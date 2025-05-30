@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe - Donuts vs Pretzels</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+            margin: 20px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            cursor: pointer;
+        }
+        .cell:hover {
+            background-color: #f0f0f0;
+        }
+        #status {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        #restart {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #cake-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: none;
+        }
+        .cake {
+            position: absolute;
+            font-size: 30px;
+            animation: fall 3s linear forwards;
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Tic Tac Toe - Donuts vs Pretzels</h1>
+    <div id="status">Player Donut's turn</div>
+    <div class="board" id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+    <button id="restart">Restart Game</button>
+    <div id="cake-animation"></div>
+
+    <script>
+        const board = document.getElementById('board');
+        const cells = document.querySelectorAll('.cell');
+        const status = document.getElementById('status');
+        const restartButton = document.getElementById('restart');
+        const cakeAnimation = document.getElementById('cake-animation');
+        let currentBoard = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = '🍩';
+        let gameActive = true;
+
+        const winningCombinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6] // Diagonals
+        ];
+
+        function handleCellClick(event) {
+            const index = event.target.getAttribute('data-index');
+            if (currentBoard[index] === '' && gameActive) {
+                currentBoard[index] = currentPlayer;
+                event.target.textContent = currentPlayer;
+                checkGameStatus();
+                currentPlayer = currentPlayer === '🍩' ? '🥨' : '🍩';
+                if (gameActive) {
+                    status.textContent = `Player ${currentPlayer === '🍩' ? 'Donut' : 'Pretzel'}'s turn`;
+                }
+            }
+        }
+
+        function checkGameStatus() {
+            for (let combo of winningCombinations) {
+                const [a, b, c] = combo;
+                if (currentBoard[a] && currentBoard[a] === currentBoard[b] && currentBoard[a] === currentBoard[c]) {
+                    status.textContent = `Player ${currentBoard[a] === '🍩' ? 'Donut' : 'Pretzel'} wins!`;
+                    gameActive = false;
+                    startCakeAnimation();
+                    return;
+                }
+            }
+            if (!currentBoard.includes('')) {
+                status.textContent = "It's a draw!";
+                gameActive = false;
+            }
+        }
+
+        function startCakeAnimation() {
+            cakeAnimation.style.display = 'block';
+            for (let i = 0; i < 20; i++) {
+                const cake = document.createElement('div');
+                cake.classList.add('cake');
+                cake.textContent = '🎂';
+                cake.style.left = `${Math.random() * 100}vw`;
+                cake.style.animationDelay = `${Math.random() * 2}s`;
+                cakeAnimation.appendChild(cake);
+                setTimeout(() => cake.remove(), 3000);
+            }
+            setTimeout(() => {
+                cakeAnimation.style.display = 'none';
+                cakeAnimation.innerHTML = '';
+            }, 3000);
+        }
+
+        function restartGame() {
+            currentBoard = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = '🍩';
+            gameActive = true;
+            status.textContent = `Player Donut's turn`;
+            cells.forEach(cell => (cell.textContent = ''));
+            cakeAnimation.style.display = 'none';
+            cakeAnimation.innerHTML = '';
+        }
+
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        restartButton.addEventListener('click', restartGame);
+    </script>
+</body>
+</html>
